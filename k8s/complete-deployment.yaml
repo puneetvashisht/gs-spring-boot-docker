@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: complete-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: complete
+  template:
+    metadata:
+      labels:
+        component: complete
+    spec:
+      containers:
+        - name: complete
+          image: puneetvashisht/gs-spring-boot-docker:latest

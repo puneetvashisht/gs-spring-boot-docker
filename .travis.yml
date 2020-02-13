@@ -4,10 +4,27 @@ jdk:
 - openjdk8
 services:
 - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
+  - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project domshom-web2
+  - gcloud config set compute/zone asia-south1-a
+  - gcloud container clusters get-credentials standard-cluster-1 --zone asia-south1-a --project domshom-web2
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 script:
 - test/run.sh
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
 notifications:
   slack:
     secure: rVmHqHTIeMQeGEYAXA6spwM4Vo9whKOhG5FNaw1nYRfsDeSzgO1YYwjAsAXfqQIArAcIvJhjALv2iNrWz+dBNCyNXEhd0XhWlpkDy9kYJR7c79SvtotNEmG3qbarrScOfBKKlMmJYPtPa7JGdUdIVhVFOQg2CK7JBzlOTx12/M8=
